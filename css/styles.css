@@ -1,0 +1,60 @@
+#main {
+    font-family: "Roboto Light";
+    font-size: 25px;
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+#title {
+    font-size: 40px;
+    font-weight: bold;
+    color: #8AC007;
+}
+
+#outerDiv {
+    /*margin-bottom: 25px;*/
+    line-height: 35px;
+    border-radius: 25px;
+    border: 2px dashed #8AC007;
+    padding: 40px;
+}
+
+#outerDiv>div {
+    line-height: 35px;
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+#error {
+    color: #FFAE19;
+    font-weight: bold;
+}
+
+#result, #message {
+    font-weight: bold;
+    color: #8AC007;
+}
+
+.inputString {
+    height: 30px;
+    width: 80px;
+    font-family: "Roboto Light";
+    font-size: 25px;
+}
+
+button {
+    height: 38px;
+    font-family: "Roboto Light";
+    font-size: 25px;
+}
+
+.hidden {
+    display: none;
+}
+
+
+

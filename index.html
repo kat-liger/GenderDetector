@@ -1,0 +1,41 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <title>Gender Detector</title>
+  <meta name="description" content="Gender Detector">
+  <meta name="viewport" content="width=device-width">
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script type="text/javascript" src="http://www.parsecdn.com/js/parse-1.5.0.min.js"></script>
+  <script src="js/detector.js"></script>
+</head>
+<body>
+  <div id="main">
+      <div id="title">Gender Detector</div>
+      <div id="outerDiv">
+          <div>
+              <span>Please enter your height (ft'in''): </span>
+              <input type="text" id="height" class="inputString">
+          </div>
+          <div>
+              <span>Please enter your weight (lbs): </span>
+              <input type="text" id="weight" class="inputString">
+          </div>
+          <div>
+              <button id="activateButton">Who am I?</button>
+          </div>
+          <div id="result">
+              <span>You are ...</span>
+              <span id="gender"></span>
+          </div>
+          <div id="error"></div>
+          <span>Did we guess right?</span>
+          <div>
+              <button id="yesButton">Yes</button>
+              <button id="noButton">No</button>
+          </div>
+          <div id="message"></div>
+      </div>
+  </div>
+</body>
+</html>
