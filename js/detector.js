@@ -15,7 +15,11 @@ $(function () {
         if (/^(\d+)'(\d+)(?:''|")$/.test(str)) {
             arr = str.split("'");
             result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
-        //if str is a number
+            //if str is in x.y or x,y format
+        } else if (/^(\d+)[.,](\d+)$/.test(str)) {
+            arr = str.split(/[.,]+/);
+            result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
+        //if str is an integer
         } else if (/^\d+$/.test(str)) {
             result = parseFloat(parseFloat(str).toFixed(3));
             //looks like feet
@@ -113,29 +117,43 @@ $(function () {
     }
 
     /**
+     * Start listening for yes and no buttons' events
+     */
+    function startListening() {
+        //activate event that allows to save the data to the database
+        document.getElementById("yesButton").addEventListener('click', saveAfterRight);
+        //activate event that allows to save the data to the database but make the userGender opposite
+        document.getElementById("noButton").addEventListener('click', saveAfterWrong);
+    }
+
+    /**
+     * Stop listening for yes and no buttons' events
+     */
+    function stopListening() {
+        //desactivate event that allows to save the data to the database
+        document.getElementById("yesButton").removeEventListener('click', saveAfterRight);
+        //desactivate event that allows to save the data to the database but make the userGender opposite
+        document.getElementById("noButton").removeEventListener('click', saveAfterWrong);
+    }
+
+    /**
      * Validate user input
      */
     function checkData() {
+        document.getElementById("message").innerHTML = "";
         userHeight = document.getElementById("height").value;
         userWeight = document.getElementById("weight").value;
-        if (/\S/.test(userWeight) && (/^\d+$/.test(userWeight)) && parseHeight(userHeight)) {
+        if (/\S/.test(userWeight) && ((/^\d+$/.test(userWeight)) || (/^(\d+)[.,](\d+)$/.test(userWeight))) && parseHeight(userHeight)) {
             //validate that both strings contain valid symbols and convert height to number
             userHeight = parseHeight(userHeight);
-            userWeight = parseFloat(userWeight).toFixed(3);
+            userWeight = parseFloat(parseFloat(userWeight).toFixed(3));
             document.getElementById("error").innerHTML = "";
             detectRatios();
-            //activate event that allows to save the data to the database
-            document.getElementById("yesButton").addEventListener('click', saveAfterRight);
-            //activate event that allows to save the data to the database but make the userGender opposite
-            document.getElementById("noButton").addEventListener('click', saveAfterWrong);
+            startListening();
         } else {
-            //document.getElementById("result").setAttribute("class", "hidden");
             document.getElementById("gender").innerHTML = '';
             document.getElementById("error").innerHTML = "Tell us your height and weight first";
-            //desactivate event that allows to save the data to the database
-            document.getElementById("yesButton").removeEventListener('click', saveAfterRight);
-            //desactivate event that allows to save the data to the database but make the userGender opposite
-            document.getElementById("noButton").removeEventListener('click', saveAfterWrong);
+            stopListening();
         }
     }
 
@@ -165,6 +183,7 @@ $(function () {
                 document.getElementById("weight").value = '';
                 document.getElementById("gender").innerHTML = '';
             });
+            stopListening();
         }
     }
 
@@ -202,6 +221,7 @@ $(function () {
                 document.getElementById("weight").value = '';
                 document.getElementById("gender").innerHTML = '';
             });
+            stopListening();
         }
     }
 
