@@ -1,23 +1,20 @@
-/*global $, jQuery, Parse, window, document, console*/
-$(function () {
+/*global $, Parse, window, document, console*/
+
+
+$(document).ready(function () {
     "use strict";
     var userGender, userHeight, userWeight;
-    Parse.$ = jQuery;
     Parse.initialize("Cxe74rWpSEn9ywH1ryu1r3J7oMxSx0SLIrvmrFK1", "j2P6dfj3iSy9eyysKpoRKMIeuVde8lHxDK6upnGz");
 
     /**
-     * Parse the weight string
-     * @param {string} str - the user input of weight
+     * Parse the height string
+     * @param {string} str - the user input of height
      */
     function parseHeight(str) {
         var result, arr;
-        //if str is in x'y" or x'y'' format
-        if (/^(\d+)'(\d+)(?:''|")$/.test(str)) {
-            arr = str.split("'");
-            result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
-            //if str is in x.y or x,y format
-        } else if (/^(\d+)[.,](\d+)$/.test(str)) {
-            arr = str.split(/[.,]+/);
+        //if str is in x'y" or x.y or x,y format
+        if (/^(\d+)[.,'](\d+)$/.test(str)) {
+            arr = str.split(/[.,']+/);
             result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
         //if str is an integer
         } else if (/^\d+$/.test(str)) {

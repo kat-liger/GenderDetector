@@ -57,4 +57,21 @@ button {
 }
 
 
+/*mobile view*/
+
+@media only screen and (max-width : 992px) {
+
+    #main {
+        width: 100%;
+        font-size: 25px;
+        position: absolute;
+        text-align: center;
+        -webkit-transform: none;
+        transform: none;
+        top: 0%;
+        left: 0%;
+    }
+
+}
+
 
