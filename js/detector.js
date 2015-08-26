@@ -1,7 +1,5 @@
 /*global $, Parse, window, document, console*/
-
-
-$(document).ready(function () {
+$(function () {
     "use strict";
     var userGender, userHeight, userWeight;
     Parse.initialize("Cxe74rWpSEn9ywH1ryu1r3J7oMxSx0SLIrvmrFK1", "j2P6dfj3iSy9eyysKpoRKMIeuVde8lHxDK6upnGz");
