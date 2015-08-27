@@ -1,54 +1,75 @@
-/*global $, Parse, window, document, console*/
-$(function () {
+(function (root, factory) {
+    if (typeof define === "function" && define.amd) {
+        define(["jquery", "Parse"], factory);
+    } else if (typeof exports === "object") {
+        module.exports = factory(require("jquery"), require("Parse"));
+    } else {
+        root.Detector = factory(root.$, root.Parse);
+    }
+}(this, function ($, Parse) {
     "use strict";
-    var userGender, userHeight, userWeight;
     Parse.initialize("Cxe74rWpSEn9ywH1ryu1r3J7oMxSx0SLIrvmrFK1", "j2P6dfj3iSy9eyysKpoRKMIeuVde8lHxDK6upnGz");
 
-    /**
-     * Parse the height string
-     * @param {string} str - the user input of height
-     */
-    function parseHeight(str) {
-        var result, arr;
-        //if str is in x'y" or x.y or x,y format
-        if (/^(\d+)[.,'](\d+)$/.test(str)) {
-            arr = str.split(/[.,']+/);
-            result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
-        //if str is an integer
-        } else if (/^\d+$/.test(str)) {
-            result = parseFloat(parseFloat(str).toFixed(3));
-            //looks like feet
-            if (result < 8) {
-                result = result * 12;
-            }
-        }
-        return result;
-    }
+    var detectedGender,
+        userHeight,
+        userWeight,
 
-    /**
-     * Detects the gender of the user
-     * @param {float} h - the user input of height
-     * @param {float} w - the user input of weight
-     * @param {float} femaleRatio - average ratio of weight/height for all women in the samples database
-     * @param {float} maleRatio - average ratio of weight/height for all men in the samples database
-     */
-    function detectGender(h, w, femaleRatio, maleRatio) {
-        var userRatio = (w / h).toFixed(3);
-        if (femaleRatio && maleRatio) {
-            //find out if userRatio is closer to femaleRatio or maleRation
-            if (Math.abs(userRatio - femaleRatio).toFixed(3) <= Math.abs(userRatio - maleRatio).toFixed(3)) {
-                userGender = "female";
-            } else if (Math.abs(userRatio - femaleRatio).toFixed(3) > Math.abs(userRatio - maleRatio).toFixed(3)) {
-                userGender = "male";
+        Detector = {
+
+            /**
+             * Parse the height string
+             * @param {string} str - the user input of height
+             */
+            parseHeight : function (str) {
+                var result, arr;
+                //if str is in x'y(") format
+                if (/^(\d+)'(\d+)/.test(str)) {
+                    arr = str.split(/[.,']+/);
+                    result = parseInt(arr[0], 10) * 12 + parseInt(arr[1], 10);
+                    //if str is in x.y or x,y format
+                } else if (/^(\d+)[.,](\d+)$/.test(str)) {
+                    result = str.replace(/,/g, '.');
+                    result = parseFloat(result).toFixed(3) * 12;
+                    //if str is an integer
+                } else if (/^\d+$/.test(str)) {
+                    result = parseFloat(parseFloat(str).toFixed(3));
+                    //looks like feet
+                    if (result < 8) {
+                        result = result * 12;
+                    }
+                }
+                return result;
+            },
+
+            /**
+             * Detects the gender of the user
+             * @param {float} h - the user input of height
+             * @param {float} w - the user input of weight
+             * @param {float} femaleRatio - average ratio of weight/height for all women in the samples database
+             * @param {float} maleRatio - average ratio of weight/height for all men in the samples database
+             */
+            detectGender: function (h, w, femaleRatio, maleRatio) {
+                var userRatio, userGender;
+                if (h && w && h.toFixed && w.toFixed) {
+                    userRatio = (w / h).toFixed(3);
+                }
+                if (femaleRatio && maleRatio && userRatio) {
+                    //find out if userRatio is closer to femaleRatio or maleRation
+                    if (Math.abs(userRatio - femaleRatio).toFixed(3) <= Math.abs(userRatio - maleRatio).toFixed(3)) {
+                        userGender = "female";
+                    } else if (Math.abs(userRatio - femaleRatio).toFixed(3) > Math.abs(userRatio - maleRatio).toFixed(3)) {
+                        userGender = "male";
+                    }
+                }
+                //show the result to the user
+                if ((userGender === 'female') && (document.getElementById("gender"))) {
+                    document.getElementById("gender").innerHTML = "A WOMAN!";
+                } else if ((userGender === 'male') && (document.getElementById("gender"))) {
+                    document.getElementById("gender").innerHTML = "A MAN!";
+                }
+                return userGender;
             }
-        }
-        //show the result to the user
-        if (userGender === 'female') {
-            document.getElementById("gender").innerHTML = "A WOMAN!";
-        } else if (userGender === 'male') {
-            document.getElementById("gender").innerHTML = "A MAN!";
-        }
-    }
+        };
 
     /**
      * Find average ratio of weight/height for all women in the samples database
@@ -107,7 +128,7 @@ $(function () {
         var d1 = findFemaleRatio(),
             d2 = findMaleRatio();
         $.when(d1, d2).done(function (femaleRatio, maleRatio) {
-            detectGender(userHeight, userWeight, femaleRatio, maleRatio);
+            detectedGender = Detector.detectGender(userHeight, userWeight, femaleRatio, maleRatio);
         });
     }
 
@@ -127,7 +148,7 @@ $(function () {
     function stopListening() {
         //desactivate event that allows to save the data to the database
         document.getElementById("yesButton").removeEventListener('click', saveAfterRight);
-        //desactivate event that allows to save the data to the database but make the userGender opposite
+        //desactivate event that allows to save the data to the database
         document.getElementById("noButton").removeEventListener('click', saveAfterWrong);
     }
 
@@ -136,11 +157,18 @@ $(function () {
      */
     function checkData() {
         document.getElementById("message").innerHTML = "";
-        userHeight = document.getElementById("height").value;
-        userWeight = document.getElementById("weight").value;
-        if (/\S/.test(userWeight) && ((/^\d+$/.test(userWeight)) || (/^(\d+)[.,](\d+)$/.test(userWeight))) && parseHeight(userHeight)) {
+        if (document.getElementById("height")) {
+            userHeight = document.getElementById("height").value;
+        }
+        if (document.getElementById("weight")) {
+            userWeight = document.getElementById("weight").value;
+        }
+        if (/\S/.test(userWeight) &&
+            ((/^\d+$/.test(userWeight)) || (/^(\d+)[.,](\d+)$/.test(userWeight))) &&
+            Detector.parseHeight(userHeight)) {
             //validate that both strings contain valid symbols and convert height to number
-            userHeight = parseHeight(userHeight);
+            userHeight = Detector.parseHeight(userHeight);
+            userWeight = userWeight.replace(/,/g, '.');
             userWeight = parseFloat(parseFloat(userWeight).toFixed(3));
             document.getElementById("error").innerHTML = "";
             detectRatios();
@@ -156,11 +184,11 @@ $(function () {
      * Save the user data to the database after the successful detection
      */
     function saveAfterRight() {
-        if (userGender && userHeight && userWeight) {
+        if (detectedGender && userHeight && userWeight) {
             document.getElementById("message").innerHTML = "Yay!";
             var Sample = Parse.Object.extend("Sample"),
                 sample  = new Sample({
-                    gender: userGender,
+                    gender: detectedGender,
                     height: parseFloat(userHeight),
                     weight: parseFloat(userWeight)
                 });
@@ -188,12 +216,12 @@ $(function () {
     function saveAfterWrong() {
         var correctGender, sample,
             Sample = Parse.Object.extend("Sample");
-        if (userGender && userHeight && userWeight) {
+        if (detectedGender && userHeight && userWeight) {
             document.getElementById("message").innerHTML = "Sorry! We'll be more accurate next time!";
 
-            if (userGender === 'female') {
+            if (detectedGender === 'female') {
                 correctGender = 'male';
-            } else if (userGender === 'male') {
+            } else if (detectedGender === 'male') {
                 correctGender = 'female';
             }
             sample  = new Sample({
@@ -220,7 +248,13 @@ $(function () {
         }
     }
 
-    //listening for events
-    document.getElementById("activateButton").addEventListener('click', checkData);
+    $( document ).ready(function() {
+        var activateButton = document.getElementById("activateButton");
+        if (activateButton) {
+            //listening for events
+            activateButton.addEventListener('click', checkData);
+        }
+    });
 
-});
+    return Detector;
+}));
